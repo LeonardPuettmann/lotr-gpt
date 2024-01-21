@@ -5,14 +5,14 @@ from torch.nn import functional as F
 # hyperparameters
 batch_size = 64
 block_size = 256
-max_iters = 500
-eval_interval = 30 
+#max_iters = 3000
+eval_interval = 10 
 learning_rate = 3e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 20
 n_embed = 384
-n_head = 3
-n_layer = 3
+n_head = 4
+n_layer = 4
 dropout = 0.2
 # -----------------------------
 
@@ -59,7 +59,6 @@ def estimate_loss():
 
 class Head(nn.Module):
     """ one head of self-attention """
-
     def __init__(self, head_size):
         super().__init__()
         self.key = nn.Linear(n_embed, head_size, bias=False)
@@ -186,10 +185,18 @@ model = model.to(device)
 # create a PyTorch optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-for iter in range(max_iters):
+threshold = 1.0  # Set your threshold here
+
+iter = 0
+while True:
     if iter % eval_interval == 0:
         losses = estimate_loss()
-        print(f"iter {iter} train loss {losses['train']:.4f} val loss {losses['val']:.4f}")
+        print(f"iter {iter} | train loss {losses['train']:.4f} | val loss {losses['val']:.4f}")
+
+        # Check if the validation loss is below the threshold
+        if losses['val'] < threshold:
+            print("Validation loss below threshold, stopping training.")
+            break
 
     # sample a batch of data
     xb, yb = get_batch("train")
@@ -200,6 +207,11 @@ for iter in range(max_iters):
     loss.backward()
     optimizer.step()
 
+    iter += 1
+
+torch.save(model, "./models/lotr-gpt.pt")
+
 # generate from the model
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))
+print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
+
