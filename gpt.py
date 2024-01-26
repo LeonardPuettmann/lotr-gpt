@@ -11,8 +11,8 @@ learning_rate = 3e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 20
 n_embed = 384
-n_head = 4
-n_layer = 4
+n_head = 6
+n_layer = 6
 dropout = 0.2
 # -----------------------------
 
@@ -185,7 +185,7 @@ model = model.to(device)
 # create a PyTorch optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-threshold = 1.0  # Set your threshold here
+threshold = 1.25  # Set your threshold here
 
 iter = 0
 while True:

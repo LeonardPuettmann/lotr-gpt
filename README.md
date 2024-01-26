@@ -1,0 +1,1 @@
+# Let's deconstruct GPT and train it on the Lord of the Rings books
