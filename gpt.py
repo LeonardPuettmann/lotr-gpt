@@ -1,3 +1,4 @@
+import os
 import torch 
 import torch.nn as nn
 from torch.nn import functional as F
@@ -5,7 +6,6 @@ from torch.nn import functional as F
 # hyperparameters
 batch_size = 64
 block_size = 256
-#max_iters = 3000
 eval_interval = 10 
 learning_rate = 3e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -186,17 +186,31 @@ model = model.to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 threshold = 1.25  # Set your threshold here
+stop_threshold = 0.8  # Set your stop threshold here
+max_epochs = 25000  # Set your maximum epochs here
+
+# Function to get the next available log file number
+def get_next_log_file_number():
+    i = 1
+    while os.path.exists(f"./logs/train-run-{i:02d}.log"):
+        i += 1
+    return i
 
 iter = 0
 while True:
-    if iter % eval_interval == 0:
+    if iter % 100 == 0:
+        # Log the current loss every 100 epochs
         losses = estimate_loss()
-        print(f"iter {iter} | train loss {losses['train']:.4f} | val loss {losses['val']:.4f}")
+        with open(f"./logs/train-run-{get_next_log_file_number():02d}.log", "a") as f:
+            f.write(f"iter {iter} | train loss {losses['train']:.4f} | val loss {losses['val']:.4f}\n")
 
-        # Check if the validation loss is below the threshold
-        if losses['val'] < threshold:
-            print("Validation loss below threshold, stopping training.")
-            break
+    if iter % 2500 == 0:
+        # Generate some code every 2500 epochs
+        context = torch.zeros((1, 1), dtype=torch.long, device=device)
+        print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
+
+        # save a model checkpoint
+        torch.save(model, f"./models/lotr-gpt-{iter}.pt")
 
     # sample a batch of data
     xb, yb = get_batch("train")
@@ -207,11 +221,9 @@ while True:
     loss.backward()
     optimizer.step()
 
+    # Check if the validation loss is below the stop threshold or if the training epochs are greater than max_epochs
+    if losses['val'] < stop_threshold or iter > max_epochs:
+        print("Validation loss below stop threshold or maximum epochs reached, stopping training.")
+        break
+
     iter += 1
-
-torch.save(model, "./models/lotr-gpt.pt")
-
-# generate from the model
-context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
-
