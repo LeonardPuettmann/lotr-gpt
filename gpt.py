@@ -185,7 +185,6 @@ model = model.to(device)
 # create a PyTorch optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-threshold = 1.25  # Set your threshold here
 stop_threshold = 0.8  # Set your stop threshold here
 max_epochs = 25000  # Set your maximum epochs here
 
