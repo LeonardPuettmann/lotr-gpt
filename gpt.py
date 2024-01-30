@@ -197,12 +197,19 @@ def get_next_log_file_number():
         i += 1
     return i
 
+# Get the log file number for this run
+log_file_number = get_next_log_file_number()
+
 iter = 0
 while True:
+    if iter % 10 == 0:
+        # Print the current loss every 10 epochs
+        losses = estimate_loss()
+        print(f"iter {iter} | train loss {losses['train']:.4f} | val loss {losses['val']:.4f}")
+
     if iter % 100 == 0:
         # Log the current loss every 100 epochs
-        losses = estimate_loss()
-        with open(f"./logs/train-run-{get_next_log_file_number():02d}.log", "a") as f:
+        with open(f"./logs/train-run-{log_file_number:02d}.log", "a") as f:
             f.write(f"iter {iter} | train loss {losses['train']:.4f} | val loss {losses['val']:.4f}\n")
 
     if iter % 2500 == 0:
