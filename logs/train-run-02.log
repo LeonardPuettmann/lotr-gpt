@@ -1,5 +1,1 @@
-iter 0 | train loss 4.8531 | val loss 4.8601
-iter 100 | train loss 2.4180 | val loss 2.4145
-iter 200 | train loss 2.3531 | val loss 2.3382
-iter 300 | train loss 2.2991 | val loss 2.2930
-iter 400 | train loss 2.2043 | val loss 2.1986
+iter 0 | train loss 4.8531 | val loss 4.8599
