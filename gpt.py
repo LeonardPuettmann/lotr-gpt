@@ -8,7 +8,7 @@ batch_size = 64
 block_size = 256
 eval_interval = 10 
 learning_rate = 3e-4
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 eval_iters = 20
 n_embed = 384
 n_head = 6
@@ -16,9 +16,11 @@ n_layer = 6
 dropout = 0.2
 # -----------------------------
 
+print(f"Using device: {device}")
+
 torch.manual_seed(1337)
 
-with open("lotr.txt", "r") as f:
+with open("lotr.txt", "r", encoding="latin-1") as f:
     text = f.read()
 
 chars = sorted(list(set(text)))
