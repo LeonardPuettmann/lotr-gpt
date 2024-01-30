@@ -18,7 +18,7 @@ dropout = 0.2
 
 torch.manual_seed(1337)
 
-with open("lotr.txt", "r") as f:
+with open("lotr.txt", "rb") as f:
     text = f.read()
 
 chars = sorted(list(set(text)))
